@@ -1,0 +1,933 @@
+/* ============================================================
+   NEXUS AI — GLOBAL CYBERPUNK GLASSMORPHISM DESIGN SYSTEM
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+    --bg-dark: #05070D;
+    --bg-card: rgba(15, 23, 42, 0.65);
+    --bg-card-hover: rgba(30, 41, 59, 0.75);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --border-glass-hover: rgba(56, 189, 248, 0.35);
+    --neon-blue: #38BDF8;
+    --neon-purple: #8B5CF6;
+    --neon-pink: #EC4899;
+    --neon-green: #10B981;
+    --neon-amber: #F59E0B;
+    --neon-red: #EF4444;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --gradient-primary: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 50%, #EC4899 100%);
+    --gradient-card: linear-gradient(145deg, rgba(20, 30, 55, 0.7) 0%, rgba(10, 15, 30, 0.85) 100%);
+    --shadow-neon: 0 0 25px rgba(56, 189, 248, 0.15);
+    --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.4);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 30px;
+}
+
+/* Base resets & Fonts */
+html, body, [class*="css"] {
+    font-family: 'Outfit', sans-serif !important;
+    color: var(--text-main);
+}
+
+code, pre, [class*="stCode"] {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Background Atmosphere */
+.stApp {
+    background:
+        radial-gradient(circle at 10% 15%, rgba(56, 189, 248, 0.08), transparent 35%),
+        radial-gradient(circle at 90% 10%, rgba(139, 92, 246, 0.10), transparent 35%),
+        radial-gradient(circle at 50% 90%, rgba(236, 72, 153, 0.06), transparent 45%),
+        var(--bg-dark) !important;
+    background-attachment: fixed !important;
+    color: var(--text-main);
+}
+
+/* Main Container Spacing */
+.block-container {
+    max-width: 1400px;
+    padding-top: 1.5rem !important;
+    padding-bottom: 4rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+}
+
+/* Streamlit Header Customization */
+header[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+[data-testid="stToolbar"] {
+    right: 1.5rem !important;
+}
+
+/* ============================================================
+   HERO CONTAINER
+   ============================================================ */
+.hero-container {
+    position: relative;
+    padding: 38px 45px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(8, 12, 28, 0.95));
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 0 45px rgba(56, 189, 248, 0.06), inset 0 0 25px rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+    margin-bottom: 28px;
+    backdrop-filter: blur(16px);
+}
+
+.hero-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--gradient-primary);
+}
+
+.hero-container::after {
+    content: "";
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    right: -120px;
+    top: -120px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.18), transparent 70%);
+    pointer-events: none;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--neon-blue);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.hero-title {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin: 0;
+    background: linear-gradient(90deg, #FFFFFF 0%, #E2E8F0 50%, #38BDF8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    color: var(--text-muted);
+    font-size: 15px;
+    font-weight: 400;
+    margin-top: 10px;
+    max-width: 900px;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   CYBER SECTION HEADERS
+   ============================================================ */
+.cyber-header {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 28px 0 16px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cyber-header-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--neon-blue);
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* ============================================================
+   METRIC KPI CARDS
+   ============================================================ */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin: 18px 0 24px 0;
+}
+
+.metric-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-glass-hover);
+    box-shadow: 0 12px 28px rgba(56, 189, 248, 0.12);
+}
+
+.metric-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.metric-icon {
+    font-size: 24px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+}
+
+.metric-label {
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.metric-value {
+    color: #FFFFFF;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-top: 4px;
+}
+
+.metric-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.metric-badge-delta {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.metric-badge-delta.pos {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34D399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.metric-badge-delta.neg {
+    background: rgba(239, 68, 68, 0.15);
+    color: #F87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================================
+   BEFORE & AFTER COMPARISON MATRIX
+   ============================================================ */
+.comparison-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.comp-card {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    border: 1px solid var(--border-glass);
+    position: relative;
+    overflow: hidden;
+}
+
+.comp-card.before {
+    border-left: 4px solid var(--neon-amber);
+}
+
+.comp-card.after {
+    border-left: 4px solid var(--neon-green);
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.04) 0%, rgba(15, 23, 42, 0.7) 100%);
+}
+
+.comp-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.comp-card.before .comp-title {
+    color: var(--neon-amber);
+}
+
+.comp-card.after .comp-title {
+    color: var(--neon-green);
+}
+
+.comp-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 13px;
+}
+
+.comp-row:last-child {
+    border-bottom: none;
+}
+
+.comp-key {
+    color: var(--text-muted);
+}
+
+.comp-val {
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+/* ============================================================
+   SIDEBAR CUSTOMIZATION
+   ============================================================ */
+section[data-testid="stSidebar"] {
+    background-color: #080C1A !important;
+    border-right: 1px solid var(--border-glass) !important;
+}
+
+section[data-testid="stSidebar"] .block-container {
+    padding: 1.5rem 1rem !important;
+}
+
+/* Sidebar Brand Header */
+.nexus-brand-card {
+    padding: 18px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.5));
+    border: 1px solid var(--border-glass);
+    margin-bottom: 18px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.nexus-brand-title {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.nexus-brand-sub {
+    font-size: 11px;
+    color: var(--neon-blue);
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* Active Dataset Indicator */
+.dataset-status-card {
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--border-glass);
+    margin: 12px 0;
+}
+
+.dataset-status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.dataset-badge-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dataset-badge-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+/* Workflow Stepper in Sidebar */
+.workflow-stepper {
+    margin: 18px 0;
+    padding: 10px 0;
+}
+
+.stepper-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stepper-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+
+.stepper-item.completed {
+    color: #34D399;
+    background: rgba(16, 185, 129, 0.08);
+}
+.stepper-item.current {
+    color: var(--neon-blue);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    font-weight: 700;
+}
+.stepper-item.pending {
+    color: var(--text-dim);
+}
+
+.stepper-icon {
+    font-size: 13px;
+    width: 18px;
+    text-align: center;
+}
+
+/* ============================================================
+   BUTTONS & NAVIGATION
+   ============================================================ */
+div.stButton > button {
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: linear-gradient(90deg, #0284C7 0%, #7C3AED 100%) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 10px 20px !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25) !important;
+}
+
+div.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.35) !important;
+    border-color: rgba(56, 189, 248, 0.5) !important;
+}
+
+div.stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* Secondary Button styling */
+div.stButton > button[kind="secondary"] {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid var(--border-glass) !important;
+    box-shadow: none !important;
+    color: var(--text-main) !important;
+}
+
+div.stButton > button[kind="secondary"]:hover {
+    background: rgba(51, 65, 85, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Download Buttons */
+div.stDownloadButton > button {
+    border-radius: 12px !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    background: linear-gradient(90deg, #059669 0%, #0D9488 100%) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25) !important;
+}
+
+div.stDownloadButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Navigation Step Footer */
+.nav-footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-glass);
+}
+
+/* ============================================================
+   SELECTION CONTROLS, SELECTBOX, MULTISELECT, RADIO, DROPDOWNS
+   HIGH READABILITY & DARK THEME COMPATIBILITY
+   ============================================================ */
+
+/* 1. Global Widget Labels */
+label[data-testid="stWidgetLabel"],
+label[data-testid="stWidgetLabel"] p,
+label[data-testid="stWidgetLabel"] span,
+div[data-testid="stWidgetLabel"] p,
+div[data-testid="stWidgetLabel"] span {
+    color: #F8FAFC !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    letter-spacing: 0.25px !important;
+}
+
+/* Widget help icons */
+label[data-testid="stWidgetLabel"] svg {
+    color: #94A3B8 !important;
+    fill: #94A3B8 !important;
+}
+
+/* 2. Selectbox & Multiselect Input Containers */
+div[data-baseweb="select"],
+div[data-testid="stSelectbox"] div[data-baseweb="select"],
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] {
+    background-color: transparent !important;
+}
+
+div[data-baseweb="select"] > div {
+    background-color: rgba(15, 23, 42, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 12px !important;
+    color: #F8FAFC !important;
+    min-height: 42px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+div[data-baseweb="select"] > div:hover,
+div[data-baseweb="select"] > div:focus-within {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.25) !important;
+    background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+/* 3. Selected Value Text (High Contrast Bright Text) */
+div[data-baseweb="select"] [data-testid="stSelectboxVirtualDropdown"],
+div[data-baseweb="select"] [aria-selected="true"],
+div[data-baseweb="select"] [class*="SingleValue"],
+div[data-baseweb="select"] [class*="ValueContainer"],
+div[data-baseweb="select"] div[class*="value"],
+div[data-baseweb="select"] span {
+    color: #F8FAFC !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+}
+
+/* 4. Placeholder Text */
+div[data-baseweb="select"] [class*="placeholder"],
+div[data-baseweb="select"] input::placeholder,
+div[data-baseweb="select"] div[class*="Placeholder"] {
+    color: #94A3B8 !important;
+    font-weight: 400 !important;
+}
+
+/* 5. Search Text Input within Select / Multiselect */
+div[data-baseweb="select"] input {
+    color: #F8FAFC !important;
+    background: transparent !important;
+    caret-color: #38BDF8 !important;
+    font-size: 14px !important;
+}
+
+/* 6. Dropdown Trigger Arrow & Clear Icons */
+div[data-baseweb="select"] svg {
+    color: #94A3B8 !important;
+    fill: #94A3B8 !important;
+    transition: color 0.2s ease, fill 0.2s ease !important;
+}
+
+div[data-baseweb="select"]:hover svg,
+div[data-baseweb="select"]:focus-within svg {
+    color: #38BDF8 !important;
+    fill: #38BDF8 !important;
+}
+
+/* 7. Multiselect Tags & Chips */
+div[data-baseweb="tag"],
+span[data-baseweb="tag"] {
+    background: rgba(56, 189, 248, 0.15) !important;
+    border: 1px solid rgba(56, 189, 248, 0.38) !important;
+    border-radius: 8px !important;
+    padding: 2px 8px !important;
+    margin: 2px 3px !important;
+    transition: all 0.2s ease !important;
+}
+
+div[data-baseweb="tag"]:hover,
+span[data-baseweb="tag"]:hover {
+    background: rgba(56, 189, 248, 0.25) !important;
+    border-color: #38BDF8 !important;
+}
+
+div[data-baseweb="tag"] span,
+span[data-baseweb="tag"] span,
+div[data-baseweb="tag"] div,
+span[data-baseweb="tag"] div {
+    color: #38BDF8 !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
+}
+
+div[data-baseweb="tag"] svg,
+span[data-baseweb="tag"] svg {
+    color: #38BDF8 !important;
+    fill: #38BDF8 !important;
+    opacity: 0.8 !important;
+}
+
+div[data-baseweb="tag"] svg:hover,
+span[data-baseweb="tag"] svg:hover {
+    opacity: 1 !important;
+    transform: scale(1.15);
+}
+
+/* 8. Dropdown Popup Menus / Popovers */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+div[data-baseweb="menu"],
+ul[role="listbox"] {
+    background: #0B1120 !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 0 0 20px rgba(56, 189, 248, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    padding: 6px !important;
+}
+
+/* 9. Dropdown Option Items */
+li[role="option"],
+div[role="option"],
+li[data-baseweb="menu-item"],
+div[data-baseweb="menu-item"] {
+    color: #E2E8F0 !important;
+    background: transparent !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    margin-bottom: 2px !important;
+    transition: all 0.15s ease !important;
+    cursor: pointer !important;
+}
+
+li[role="option"] *,
+div[role="option"] *,
+li[data-baseweb="menu-item"] *,
+div[data-baseweb="menu-item"] * {
+    color: #E2E8F0 !important;
+}
+
+/* Hovered / Focused Option */
+li[role="option"]:hover,
+li[role="option"][aria-selected="false"]:hover,
+li[data-highlighted="true"],
+li[role="option"]:focus,
+div[role="option"]:hover {
+    background: rgba(56, 189, 248, 0.18) !important;
+    color: #38BDF8 !important;
+    transform: translateX(3px) !important;
+}
+
+li[role="option"]:hover *,
+li[data-highlighted="true"] *,
+div[role="option"]:hover * {
+    color: #38BDF8 !important;
+    font-weight: 600 !important;
+}
+
+/* Selected Option Item */
+li[role="option"][aria-selected="true"],
+li[aria-selected="true"],
+div[role="option"][aria-selected="true"] {
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.3), rgba(139, 92, 246, 0.3)) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    border-left: 3px solid #38BDF8 !important;
+}
+
+li[role="option"][aria-selected="true"] *,
+li[aria-selected="true"] *,
+div[role="option"][aria-selected="true"] * {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+/* 10. Radio Buttons (st.radio) */
+div[data-testid="stRadio"] label[data-testid="stWidgetLabel"] {
+    color: #F8FAFC !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] {
+    gap: 10px !important;
+}
+
+div[data-testid="stRadio"] label[data-baseweb="radio"] {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 8px 14px !important;
+    border-radius: 10px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+div[data-testid="stRadio"] label[data-baseweb="radio"]:hover {
+    border-color: rgba(56, 189, 248, 0.5) !important;
+    background: rgba(56, 189, 248, 0.08) !important;
+}
+
+div[data-testid="stRadio"] label[data-baseweb="radio"] div[data-testid="stMarkdownContainer"] p,
+div[data-testid="stRadio"] label[data-baseweb="radio"] span,
+div[data-testid="stRadio"] label[data-baseweb="radio"] p {
+    color: #E2E8F0 !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+}
+
+div[data-testid="stRadio"] label[data-baseweb="radio"]:hover p,
+div[data-testid="stRadio"] label[data-baseweb="radio"]:hover span {
+    color: #38BDF8 !important;
+}
+
+div[data-testid="stRadio"] div[data-baseweb="radio"] div:first-child {
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+}
+
+div[data-testid="stRadio"] div[data-baseweb="radio"] input:checked + div {
+    border-color: #38BDF8 !important;
+    background: #38BDF8 !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5) !important;
+}
+
+/* 11. Segmented Controls & Checkboxes */
+div[data-testid="stSegmentedControl"] {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+}
+
+div[data-testid="stSegmentedControl"] button {
+    color: #94A3B8 !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: none !important;
+}
+
+div[data-testid="stSegmentedControl"] button[aria-checked="true"],
+div[data-testid="stSegmentedControl"] button[data-checked="true"] {
+    background: linear-gradient(90deg, #0284C7 0%, #7C3AED 100%) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3) !important;
+}
+
+div[data-testid="stCheckbox"] label span {
+    color: #E2E8F0 !important;
+    font-size: 13.5px !important;
+}
+
+div[data-testid="stCheckbox"] input[type="checkbox"] + div {
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+    border-radius: 6px !important;
+}
+
+div[data-testid="stCheckbox"] input[type="checkbox"]:checked + div {
+    background: linear-gradient(135deg, #0284C7, #7C3AED) !important;
+    border-color: #38BDF8 !important;
+}
+
+/* 12. Text Inputs, Number Inputs, Sliders */
+div[data-testid="stTextInput"] input,
+div[data-testid="stNumberInput"] input {
+    background-color: rgba(15, 23, 42, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 12px !important;
+    color: #F8FAFC !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+div[data-testid="stTextInput"] input:focus,
+div[data-testid="stNumberInput"] input:focus {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.25) !important;
+}
+
+div[data-testid="stNumberInput"] button {
+    color: #94A3B8 !important;
+    background: rgba(30, 41, 59, 0.6) !important;
+}
+
+div[data-testid="stNumberInput"] button:hover {
+    color: #38BDF8 !important;
+    background: rgba(56, 189, 248, 0.15) !important;
+}
+
+div[data-testid="stSlider"] div[data-testid="stWidgetLabel"] {
+    color: #F8FAFC !important;
+}
+
+div[data-testid="stSlider"] div[data-testid="stSliderTickBar"] {
+    color: #94A3B8 !important;
+}
+
+/* ============================================================
+   FILE UPLOADER, EXPANDERS, TABS, ALERTS
+   ============================================================ */
+div[data-testid="stFileUploader"] {
+    background: rgba(15, 23, 42, 0.55);
+    border: 1.5px dashed rgba(56, 189, 248, 0.4);
+    border-radius: var(--radius-md);
+    padding: 22px;
+    transition: all 0.3s ease;
+}
+
+div[data-testid="stFileUploader"]:hover {
+    border-color: var(--neon-blue);
+    background: rgba(15, 23, 42, 0.75);
+    box-shadow: var(--shadow-neon);
+}
+
+div[data-testid="stExpander"] {
+    background: rgba(15, 23, 42, 0.45) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: 14px;
+}
+
+div[data-testid="stExpander"] summary span {
+    color: #F8FAFC !important;
+    font-weight: 600 !important;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 6px;
+    border-radius: 14px;
+    border: 1px solid var(--border-glass);
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 42px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0 18px;
+    border: none !important;
+    transition: all 0.2s ease;
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.25), rgba(139, 92, 246, 0.25)) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+}
+
+/* Tables & Dataframes */
+div[data-testid="stDataFrame"] {
+    border-radius: 14px;
+    border: 1px solid var(--border-glass);
+    overflow: hidden;
+}
+
+/* Alert Boxes */
+[data-testid="stAlert"] {
+    border-radius: 14px !important;
+    background: rgba(15, 23, 42, 0.75) !important;
+    border: 1px solid var(--border-glass) !important;
+    backdrop-filter: blur(12px);
+}
+
+/* Progress bar */
+.stProgress > div > div > div > div {
+    background: var(--gradient-primary) !important;
+    border-radius: 999px;
+}
+
+/* ============================================================
+   RESPONSIVE MEDIA QUERIES
+   ============================================================ */
+@media (max-width: 900px) {
+    .hero-title {
+        font-size: 28px;
+    }
+    .hero-container {
+        padding: 24px;
+    }
+    .comparison-container {
+        grid-template-columns: 1fr;
+    }
+    .metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

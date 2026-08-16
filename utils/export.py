@@ -1,0 +1,147 @@
+"""
+Nexus AI — Export & Reporting Engine
+------------------------------------
+Handles multi-format file downloads for datasets (CSV, Excel), predictions,
+model metrics (JSON), comprehensive AI audit reports (Markdown/TXT), and trained model binaries.
+"""
+
+import io
+import json
+import joblib
+import pandas as pd
+import streamlit as st
+from datetime import datetime
+from .session_state import get_dataset_telemetry
+
+
+def to_csv_bytes(df: pd.DataFrame) -> bytes:
+    """Convert dataframe to CSV UTF-8 bytes."""
+    return df.to_csv(index=False).encode("utf-8")
+
+
+def to_excel_bytes(df: pd.DataFrame) -> bytes:
+    """Convert dataframe to Excel .xlsx bytes using openpyxl."""
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Nexus_AI_Data")
+    return output.getvalue()
+
+
+def to_json_bytes(data: dict) -> bytes:
+    """Convert dictionary to formatted JSON bytes."""
+    # Convert numpy and pandas types to standard python
+    def default_serializer(obj):
+        if hasattr(obj, "tolist"):
+            return obj.tolist()
+        if hasattr(obj, "item"):
+            return obj.item()
+        return str(obj)
+
+    json_str = json.dumps(data, indent=4, default=default_serializer)
+    return json_str.encode("utf-8")
+
+
+def to_joblib_bytes(model) -> bytes:
+    """Serialize scikit-learn model to in-memory joblib bytes."""
+    output = io.BytesIO()
+    joblib.dump(model, output)
+    return output.getvalue()
+
+
+def generate_audit_report() -> str:
+    """
+    Generate an extensive Markdown / Plaintext Audit Report summarizing the entire
+    Nexus AI end-to-end Machine Learning pipeline lifecycle.
+    """
+    df = st.session_state.get("data")
+    orig_df = st.session_state.get("original_data")
+    t_curr = get_dataset_telemetry(df)
+    t_orig = get_dataset_telemetry(orig_df) if orig_df is not None else t_curr
+
+    file_name = st.session_state.get("file_name", "Raw Data")
+    dataset_name = st.session_state.get("dataset_name", "Nexus Dataset")
+    model_name = st.session_state.get("model_name", "None")
+    problem_type = st.session_state.get("problem_type", "None")
+    target_col = st.session_state.get("target_column", "None")
+    training_time = st.session_state.get("training_time", 0.0)
+    t_latency_str = f"{training_time:.3f} seconds" if isinstance(training_time, (int, float)) else str(training_time or "N/A")
+    metrics = st.session_state.get("evaluation_metrics", {})
+    logs = st.session_state.get("transformation_log", [])
+
+    report = f"""# ⚡ NEXUS AI — COMPREHENSIVE MACHINE LEARNING AUDIT REPORT
+Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Platform Version: Nexus AI Studio v3.0
+
+---
+
+## 1. DATASET LIFECYCLE SUMMARY
+- **Dataset Identification:** {dataset_name} ({file_name})
+- **Original Ingestion Shape:** {t_orig['rows']:,} rows × {t_orig['cols']} columns
+- **Final Processed Shape:** {t_curr['rows']:,} rows × {t_curr['cols']} columns
+- **Original Missing Values:** {t_orig['missing_count']:,} ({t_orig['missing_pct']:.1f}%)
+- **Final Missing Values:** {t_curr['missing_count']:,} ({t_curr['missing_pct']:.1f}%)
+- **Original Duplicates:** {t_orig['duplicate_count']:,}
+- **Final Duplicates:** {t_curr['duplicate_count']:,}
+- **Final Numerical Features:** {t_curr['numeric_count']}
+- **Final Categorical Features:** {t_curr['categorical_count']}
+- **Memory Footprint:** {t_curr['memory_mb']:.2f} MB
+- **Health Readiness Score:** {t_curr['health_score']}/100
+
+---
+
+## 2. PREPROCESSING & FEATURE ENGINEERING AUDIT LOG
+"""
+    if logs:
+        for idx, entry in enumerate(logs, 1):
+            report += f"{idx}. {entry}\n"
+    else:
+        report += "- Standard pipeline execution (No explicit transformation log registered).\n"
+
+    report += f"""
+---
+
+## 3. MACHINE LEARNING ARCHITECTURE
+- **ML Paradigm:** {problem_type}
+- **Selected Model Algorithm:** {model_name}
+- **Target Variable:** {target_col}
+- **Execution Training Latency:** {t_latency_str}
+- **Features Selected for Modeling:** {len(st.session_state.get('selected_features', [])) or t_curr['cols'] - (1 if target_col != 'None' else 0)} features
+
+---
+
+## 4. EVALUATION & PERFORMANCE BENCHMARKS
+"""
+    if metrics:
+        for k, v in metrics.items():
+            if isinstance(v, float):
+                report += f"- **{k}:** {v:.4f}\n"
+            else:
+                report += f"- **{k}:** {v}\n"
+    else:
+        report += "- Model evaluation pending or unsupervised paradigm.\n"
+
+    report += """
+---
+
+## 5. REPRODUCIBILITY & DEPLOYMENT INSTRUCTIONS
+This dataset and model was processed using Nexus AI's standard pipelines.
+To load the exported `.joblib` model in Python:
+```python
+import joblib
+import pandas as pd
+
+# Load Model
+model = joblib.load("nexus_model.joblib")
+
+# Load Processed Feature Matrix
+X_new = pd.read_csv("nexus_processed_data.csv")
+
+# Generate Predictions
+predictions = model.predict(X_new)
+print(predictions[:10])
+```
+
+---
+*Report auto-generated by Nexus AI — The Autonomous Data Science & Machine Learning Engine.*
+"""
+    return report
