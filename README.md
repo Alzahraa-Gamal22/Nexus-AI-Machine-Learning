@@ -240,32 +240,6 @@ The application is deployed using **Streamlit Community Cloud**.
 
 ---
 
-## 📸 Screenshots
-
-> Screenshots of the Nexus AI interface will be added here.
-
-### 🏠 Executive Dashboard
-
-*Add dashboard screenshot here.*
-
-### 📂 Data Ingestion
-
-*Add dataset upload screenshot here.*
-
-### 📊 Exploratory Data Analysis
-
-*Add EDA screenshot here.*
-
-### 🤖 Model Training
-
-*Add model training screenshot here.*
-
-### 📈 Model Evaluation
-
-*Add evaluation screenshot here.*
-
----
-
 ## 🎯 Project Objectives
 
 Nexus AI was designed to:
