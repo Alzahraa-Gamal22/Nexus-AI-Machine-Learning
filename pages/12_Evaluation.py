@@ -545,13 +545,27 @@ def main():
         with tab_diag_curves:
             render_section_header("02", "Discriminative Power & Precision-Recall")
             if y_prob is not None and y_test is not None:
+                class_names = None
+                if pipeline.target_classes_ is not None:
+                    class_names = [str(c) for c in pipeline.target_classes_]
+                elif pipeline.target_encoder is not None:
+                    class_names = [str(c) for c in pipeline.target_encoder.classes_]
+
                 c1, c2 = st.columns(2)
                 with c1:
-                    st.plotly_chart(plot_roc_curve_chart(y_test, y_prob), use_container_width=True)
+                    fig_roc = plot_roc_curve_chart(y_test, y_prob, class_names=class_names)
+                    if fig_roc is not None:
+                        st.plotly_chart(fig_roc, use_container_width=True)
+                    else:
+                        st.warning("⚠️ Receiver Operating Characteristic (ROC) Curve is unavailable for the current target/model configuration.")
                 with c2:
-                    st.plotly_chart(plot_precision_recall_chart(y_test, y_prob), use_container_width=True)
+                    fig_pr = plot_precision_recall_chart(y_test, y_prob, class_names=class_names)
+                    if fig_pr is not None:
+                        st.plotly_chart(fig_pr, use_container_width=True)
+                    else:
+                        st.warning("⚠️ Precision-Recall Curve is unavailable for the current target/model configuration.")
             else:
-                st.info("ℹ️ Probability estimates not available for this model architecture (ROC/PR requires predict_proba).")
+                st.info("ℹ️ Continuous probability or decision scores are not available for this model architecture (ROC/PR requires predict_proba or decision_function).")
 
         with tab_diag_imp:
             render_section_header("02", "Feature Importance & Model Attribution")

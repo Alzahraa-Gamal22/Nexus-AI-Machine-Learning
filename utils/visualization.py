@@ -226,41 +226,168 @@ def plot_confusion_matrix(cm: np.ndarray, labels: list) -> go.Figure:
         labels=dict(x="Predicted Class", y="Actual Class", color="Count"),
         color_continuous_scale="Purples",
     )
-    return _apply_cyber_theme(fig, "Confusion Matrix")
+    return _apply_cyber_theme(fig, "Confusion Matrix Heatmap")
 
 
-def plot_roc_curve_chart(y_test, y_probs) -> go.Figure:
-    """Generate ROC-AUC curve."""
-    fig = go.Figure()
+def plot_roc_curve_chart(y_test, y_probs, class_names: list = None) -> go.Figure:
+    """
+    Generate ROC-AUC curve supporting both binary and multiclass (One-vs-Rest).
+    Returns None if computation is not feasible.
+    """
+    if y_test is None or y_probs is None:
+        return None
 
-    if y_probs.ndim == 1 or y_probs.shape[1] == 2:
-        probs = y_probs[:, 1] if y_probs.ndim > 1 else y_probs
-        fpr, tpr, _ = roc_curve(y_test, probs)
-        roc_auc = auc(fpr, tpr)
-        fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f"ROC (AUC = {roc_auc:.3f})", line=dict(color="#38BDF8", width=3)))
-    else:
-        # Multi-class
-        for i in range(y_probs.shape[1]):
-            binary_y = (y_test == i).astype(int)
-            fpr, tpr, _ = roc_curve(binary_y, y_probs[:, i])
+    try:
+        y_test_arr = np.asarray(y_test)
+        y_probs_arr = np.asarray(y_probs)
+
+        if len(y_test_arr) == 0 or len(y_probs_arr) == 0 or len(y_test_arr) != len(y_probs_arr):
+            return None
+
+        # Guard: Check for continuous regression target
+        if pd.api.types.is_float_dtype(y_test_arr.dtype) and len(np.unique(y_test_arr)) > 20:
+            return None
+
+        unique_classes = np.unique(y_test_arr)
+        n_classes = len(unique_classes)
+        if n_classes < 2:
+            return None
+
+        fig = go.Figure()
+
+        # Binary Classification
+        if n_classes == 2:
+            pos_label = unique_classes[1]
+            y_binary = (y_test_arr == pos_label).astype(int)
+
+            if y_probs_arr.ndim == 2:
+                scores = y_probs_arr[:, 1] if y_probs_arr.shape[1] >= 2 else y_probs_arr[:, 0]
+            else:
+                scores = y_probs_arr
+
+            fpr, tpr, _ = roc_curve(y_binary, scores)
             roc_auc = auc(fpr, tpr)
-            fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f"Class {i} (AUC = {roc_auc:.3f})"))
+            label_name = class_names[1] if class_names and len(class_names) > 1 else str(pos_label)
+            fig.add_trace(go.Scatter(
+                x=fpr, y=tpr,
+                name=f"ROC ({label_name}, AUC = {roc_auc:.3f})",
+                line=dict(color="#38BDF8", width=3)
+            ))
 
-    fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], name="Chance", line=dict(color="rgba(255,255,255,0.3)", dash="dash")))
-    fig.update_xaxes(title="False Positive Rate")
-    fig.update_yaxes(title="True Positive Rate")
-    return _apply_cyber_theme(fig, "Receiver Operating Characteristic (ROC) Curve")
+        # Multi-class Classification (One-vs-Rest)
+        else:
+            if y_probs_arr.ndim != 2:
+                return None
+            palette = ["#38BDF8", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B", "#6366F1", "#14B8A6"]
+            n_prob_cols = y_probs_arr.shape[1]
+
+            for idx, cls in enumerate(unique_classes):
+                if idx >= n_prob_cols:
+                    break
+                y_binary = (y_test_arr == cls).astype(int)
+                if len(np.unique(y_binary)) < 2:
+                    continue
+                scores = y_probs_arr[:, idx]
+                fpr, tpr, _ = roc_curve(y_binary, scores)
+                roc_auc = auc(fpr, tpr)
+                c_name = class_names[idx] if class_names and idx < len(class_names) else str(cls)
+                color = palette[idx % len(palette)]
+                fig.add_trace(go.Scatter(
+                    x=fpr, y=tpr,
+                    name=f"{c_name} (AUC = {roc_auc:.3f})",
+                    line=dict(color=color, width=2.5)
+                ))
+
+        fig.add_trace(go.Scatter(
+            x=[0, 1], y=[0, 1],
+            name="Chance Baseline",
+            line=dict(color="rgba(255,255,255,0.3)", dash="dash")
+        ))
+        fig.update_xaxes(title="False Positive Rate (FPR)", range=[-0.02, 1.02])
+        fig.update_yaxes(title="True Positive Rate (TPR)", range=[-0.02, 1.05])
+        return _apply_cyber_theme(fig, "Receiver Operating Characteristic (ROC) Curve")
+
+    except Exception:
+        return None
 
 
-def plot_precision_recall_chart(y_test, y_probs) -> go.Figure:
-    """Generate Precision-Recall curve."""
-    fig = go.Figure()
-    probs = y_probs[:, 1] if y_probs.ndim > 1 else y_probs
-    precision, recall, _ = precision_recall_curve(y_test, probs)
-    fig.add_trace(go.Scatter(x=recall, y=precision, name="PR Curve", line=dict(color="#8B5CF6", width=3), fill="tozeroy"))
-    fig.update_xaxes(title="Recall")
-    fig.update_yaxes(title="Precision")
-    return _apply_cyber_theme(fig, "Precision-Recall Curve")
+def plot_precision_recall_chart(y_test, y_probs, class_names: list = None) -> go.Figure:
+    """
+    Generate Precision-Recall curve supporting both binary and multiclass (One-vs-Rest).
+    Returns None if computation is not feasible.
+    """
+    if y_test is None or y_probs is None:
+        return None
+
+    try:
+        y_test_arr = np.asarray(y_test)
+        y_probs_arr = np.asarray(y_probs)
+
+        if len(y_test_arr) == 0 or len(y_probs_arr) == 0 or len(y_test_arr) != len(y_probs_arr):
+            return None
+
+        # Guard: Check for continuous regression target
+        if pd.api.types.is_float_dtype(y_test_arr.dtype) and len(np.unique(y_test_arr)) > 20:
+            return None
+
+        unique_classes = np.unique(y_test_arr)
+        n_classes = len(unique_classes)
+        if n_classes < 2:
+            return None
+
+        fig = go.Figure()
+
+        # Binary Classification
+        if n_classes == 2:
+            pos_label = unique_classes[1]
+            y_binary = (y_test_arr == pos_label).astype(int)
+
+            if y_probs_arr.ndim == 2:
+                scores = y_probs_arr[:, 1] if y_probs_arr.shape[1] >= 2 else y_probs_arr[:, 0]
+            else:
+                scores = y_probs_arr
+
+            precision, recall, _ = precision_recall_curve(y_binary, scores)
+            pr_auc = auc(recall, precision)
+            label_name = class_names[1] if class_names and len(class_names) > 1 else str(pos_label)
+            fig.add_trace(go.Scatter(
+                x=recall, y=precision,
+                name=f"PR ({label_name}, AUC = {pr_auc:.3f})",
+                line=dict(color="#8B5CF6", width=3),
+                fill="tozeroy",
+                fillcolor="rgba(139, 92, 246, 0.15)"
+            ))
+
+        # Multi-class Classification (One-vs-Rest)
+        else:
+            if y_probs_arr.ndim != 2:
+                return None
+            palette = ["#8B5CF6", "#38BDF8", "#EC4899", "#10B981", "#F59E0B", "#6366F1", "#14B8A6"]
+            n_prob_cols = y_probs_arr.shape[1]
+
+            for idx, cls in enumerate(unique_classes):
+                if idx >= n_prob_cols:
+                    break
+                y_binary = (y_test_arr == cls).astype(int)
+                if len(np.unique(y_binary)) < 2:
+                    continue
+                scores = y_probs_arr[:, idx]
+                precision, recall, _ = precision_recall_curve(y_binary, scores)
+                pr_auc = auc(recall, precision)
+                c_name = class_names[idx] if class_names and idx < len(class_names) else str(cls)
+                color = palette[idx % len(palette)]
+                fig.add_trace(go.Scatter(
+                    x=recall, y=precision,
+                    name=f"{c_name} (PR AUC = {pr_auc:.3f})",
+                    line=dict(color=color, width=2.5)
+                ))
+
+        fig.update_xaxes(title="Recall", range=[-0.02, 1.02])
+        fig.update_yaxes(title="Precision", range=[-0.02, 1.05])
+        return _apply_cyber_theme(fig, "Precision-Recall Curve")
+
+    except Exception:
+        return None
 
 
 def plot_feature_importance_chart(importance_df: pd.DataFrame) -> go.Figure:
@@ -318,4 +445,3 @@ def plot_prediction_probabilities(classes: list, probabilities: list) -> go.Figu
     fig.update_traces(textposition="outside", marker_line_color="rgba(255,255,255,0.2)", marker_line_width=1)
     fig.update_xaxes(range=[0, 1.15], tickformat=".0%")
     return _apply_cyber_theme(fig, "Class Probability Confidence")
-

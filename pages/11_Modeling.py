@@ -264,7 +264,19 @@ def main():
                     model.fit(X_tr, y_tr)
                     t_dur = time.time() - t_start
                     y_pred = model.predict(X_te)
-                    y_prob = model.predict_proba(X_te) if hasattr(model, "predict_proba") else None
+                    
+                    # Probabilities / Decision Scores
+                    y_prob = None
+                    if hasattr(model, "predict_proba"):
+                        try:
+                            y_prob = model.predict_proba(X_te)
+                        except Exception:
+                            y_prob = None
+                    elif hasattr(model, "decision_function"):
+                        try:
+                            y_prob = model.decision_function(X_te)
+                        except Exception:
+                            y_prob = None
 
                     acc = accuracy_score(y_te, y_pred)
                     prec = precision_score(y_te, y_pred, average="weighted", zero_division=0)
@@ -353,7 +365,8 @@ def main():
                     st.session_state.update({
                         "model": model, "model_name": model_choice, "problem_type": problem_type,
                         "training_time": t_dur, "X_train": X_tr, "X_test": X_te, "y_train": y_tr,
-                        "y_test": y_te, "y_pred": y_pred, "evaluation_metrics": metrics_dict,
+                        "y_test": y_te, "y_pred": y_pred, "y_prob": None,
+                        "evaluation_metrics": metrics_dict,
                         "feature_importance_df": imp_df, "predictions_df": pred_df,
                         "selected_features": selected_features,
                         "preprocessing_pipeline": pipeline,
@@ -389,6 +402,7 @@ def main():
                         "model": model, "model_name": model_choice, "problem_type": problem_type,
                         "training_time": t_dur, "cluster_labels": labels, "evaluation_metrics": metrics_dict,
                         "predictions_df": clustered_df, "selected_features": selected_features,
+                        "y_test": None, "y_pred": None, "y_prob": None,
                         "preprocessing_pipeline": pipeline,
                     })
 
