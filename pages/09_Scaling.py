@@ -91,8 +91,10 @@ def main():
             if not target_scale_cols:
                 st.error("Please select at least one feature to scale.")
             else:
-                df_scaled = apply_feature_scaling(df, target_scale_cols, scaler_type=scaler_code)
+                df_scaled, scaler_obj = apply_feature_scaling(df, target_scale_cols, scaler_type=scaler_code)
                 st.session_state.scaling_done = True
+                if scaler_obj is not None and st.session_state.get("preprocessing_pipeline"):
+                    st.session_state.preprocessing_pipeline.record_scaling(scaler_obj, scaler_code, target_scale_cols)
                 set_active_data(df_scaled, stage_name="Scaling", log_entry=f"Applied {scaler_choice} on {len(target_scale_cols)} features: {', '.join(target_scale_cols)}")
                 st.success(f"✓ Successfully scaled {len(target_scale_cols)} features using {scaler_code}!")
                 st.rerun()

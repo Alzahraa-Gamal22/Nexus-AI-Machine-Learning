@@ -300,3 +300,22 @@ def plot_residuals_chart(y_test, y_pred) -> go.Figure:
     fig.update_xaxes(title="Fitted / Predicted Values")
     fig.update_yaxes(title="Residuals (Error)")
     return _apply_cyber_theme(fig, "Residuals vs Fitted Values")
+
+
+def plot_prediction_probabilities(classes: list, probabilities: list) -> go.Figure:
+    """Horizontal bar chart showing class prediction probabilities."""
+    df_prob = pd.DataFrame({"Class": [str(c) for c in classes], "Probability": probabilities})
+    df_prob = df_prob.sort_values("Probability", ascending=True)
+    fig = px.bar(
+        df_prob,
+        x="Probability",
+        y="Class",
+        orientation="h",
+        text=df_prob["Probability"].apply(lambda p: f"{p:.1%}"),
+        color="Probability",
+        color_continuous_scale=[[0, "#38BDF8"], [0.5, "#8B5CF6"], [1, "#10B981"]],
+    )
+    fig.update_traces(textposition="outside", marker_line_color="rgba(255,255,255,0.2)", marker_line_width=1)
+    fig.update_xaxes(range=[0, 1.15], tickformat=".0%")
+    return _apply_cyber_theme(fig, "Class Probability Confidence")
+

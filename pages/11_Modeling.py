@@ -2,7 +2,7 @@
 Nexus AI — Page 11: Machine Learning Model Selection & Training Studio
 ----------------------------------------------------------------------
 Multi-paradigm machine learning lab supporting Classification, Regression,
-and Clustering with hyperparameter tuning and execution telemetry.
+and Clustering with hyperparameter tuning, pipeline synchronization, and telemetry.
 """
 
 import time
@@ -10,6 +10,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge, Lasso
 from sklearn.svm import SVC, SVR
@@ -21,7 +22,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
     r2_score, mean_absolute_error, mean_squared_error,
-    silhouette_score
+    silhouette_score, davies_bouldin_score, calinski_harabasz_score
 )
 try:
     from xgboost import XGBClassifier, XGBRegressor
@@ -30,6 +31,7 @@ except ImportError:
     XGBOOST_AVAILABLE = False
 
 from utils.session_state import init_session_state, get_active_data, get_dataset_telemetry
+from utils.preprocessing import PreprocessingPipeline
 from utils.ui import inject_global_css, render_hero, render_section_header, render_metric_grid, render_step_navigation, render_sidebar_status, dataset_guard, render_html
 
 
@@ -75,6 +77,7 @@ def main():
                 selected_features = st.multiselect("Select Input Features (X):", avail_features, default=avail_features, key="ml_selected_features")
             else:
                 st.session_state.target_column = None
+                target_col = None
                 avail_features = num_cols
                 selected_features = st.multiselect("Select Clustering Features (X):", avail_features, default=avail_features, key="ml_cluster_features")
 
@@ -213,10 +216,10 @@ def main():
                 status_text = st.empty()
 
                 for i in range(100):
-                    time.sleep(0.003)
+                    time.sleep(0.002)
                     progress_bar.progress(i + 1)
                     if i == 20:
-                        status_text.info("🔄 Splitting data & partitioning feature matrices...")
+                        status_text.info("🔄 Synchronizing preprocessing pipeline & data partitions...")
                     elif i == 50:
                         status_text.info(f"🧠 Training {model_choice} architecture...")
                     elif i == 85:
@@ -225,12 +228,37 @@ def main():
                 status_text.empty()
                 progress_bar.empty()
 
+                # Synchronize Preprocessing Pipeline
+                pipeline = st.session_state.get("preprocessing_pipeline")
+                if pipeline is None:
+                    pipeline = PreprocessingPipeline()
+                    orig_data = st.session_state.get("original_data")
+                    if orig_data is not None:
+                        pipeline.init_from_raw(orig_data, target_col=target_col, problem_type=problem_type)
+                    else:
+                        pipeline.init_from_raw(df, target_col=target_col, problem_type=problem_type)
+
+                pipeline.record_model_features(selected_features, target_col=target_col, problem_type=problem_type)
+
                 # Execution Logic
                 if problem_type == "Classification":
+                    # Handle target encoding
+                    is_string_target = not pd.api.types.is_numeric_dtype(y) or "XGBoost" in model_choice
+                    target_encoder = None
+                    if is_string_target:
+                        target_encoder = LabelEncoder()
+                        y_work = pd.Series(target_encoder.fit_transform(y.astype(str)), index=y.index)
+                        pipeline.target_encoder = target_encoder
+                        pipeline.target_classes_ = list(target_encoder.classes_)
+                    else:
+                        y_work = y.copy()
+                        pipeline.target_encoder = None
+                        pipeline.target_classes_ = sorted(list(np.unique(y_work)))
+
                     # Stratify if minimum class count >= 2
-                    class_counts = y.value_counts()
-                    strat = y if class_counts.min() >= 2 else None
-                    X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=test_pct, random_state=42, stratify=strat)
+                    class_counts = y_work.value_counts()
+                    strat = y_work if class_counts.min() >= 2 else None
+                    X_tr, X_te, y_tr, y_te = train_test_split(X, y_work, test_size=test_pct, random_state=42, stratify=strat)
 
                     t_start = time.time()
                     model.fit(X_tr, y_tr)
@@ -262,7 +290,18 @@ def main():
                         imp_vals = np.abs(coefs) if coefs.ndim == 1 else np.mean(np.abs(coefs), axis=0)
                         imp_df = pd.DataFrame({"Feature": X.columns, "Importance": imp_vals})
 
-                    pred_df = pd.DataFrame({"Actual": y_te.reset_index(drop=True), "Predicted": pd.Series(y_pred).reset_index(drop=True)})
+                    # Decoded labels for predictions dataframe
+                    if target_encoder is not None:
+                        actual_display = target_encoder.inverse_transform(y_te.reset_index(drop=True))
+                        pred_display = target_encoder.inverse_transform(pd.Series(y_pred).reset_index(drop=True))
+                    else:
+                        actual_display = y_te.reset_index(drop=True)
+                        pred_display = pd.Series(y_pred).reset_index(drop=True)
+
+                    pred_df = pd.DataFrame({
+                        "Actual": actual_display,
+                        "Predicted": pred_display
+                    })
                     pred_df["Accurate"] = pred_df["Actual"] == pred_df["Predicted"]
 
                     st.session_state.update({
@@ -271,11 +310,15 @@ def main():
                         "y_test": y_te, "y_pred": y_pred, "y_prob": y_prob,
                         "evaluation_metrics": metrics_dict, "feature_importance_df": imp_df,
                         "predictions_df": pred_df, "selected_features": selected_features,
+                        "preprocessing_pipeline": pipeline,
                     })
 
                     st.success(f"✓ Model trained successfully! (Accuracy: {acc:.2%}, F1: {f1:.2%})")
 
                 elif problem_type == "Regression":
+                    pipeline.target_encoder = None
+                    pipeline.target_classes_ = None
+
                     X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=test_pct, random_state=42)
 
                     t_start = time.time()
@@ -313,20 +356,28 @@ def main():
                         "y_test": y_te, "y_pred": y_pred, "evaluation_metrics": metrics_dict,
                         "feature_importance_df": imp_df, "predictions_df": pred_df,
                         "selected_features": selected_features,
+                        "preprocessing_pipeline": pipeline,
                     })
 
                     st.success(f"✓ Regression model trained successfully! (R²: {r2:.4f}, RMSE: {rmse:.4f})")
 
                 elif problem_type == "Clustering":
+                    pipeline.target_encoder = None
+                    pipeline.target_classes_ = None
+
                     t_start = time.time()
                     labels = model.fit_predict(X)
                     t_dur = time.time() - t_start
 
                     sil = silhouette_score(X, labels) if 2 <= len(np.unique(labels)) < len(X) else 0.0
+                    db_score = davies_bouldin_score(X, labels) if 2 <= len(np.unique(labels)) < len(X) else 0.0
+                    ch_score = calinski_harabasz_score(X, labels) if 2 <= len(np.unique(labels)) < len(X) else 0.0
 
                     metrics_dict = {
                         "Number of Clusters": model.n_clusters,
                         "Silhouette Score": sil,
+                        "Davies-Bouldin Index": db_score,
+                        "Calinski-Harabasz Score": ch_score,
                         "Training Latency": f"{t_dur:.3f}s",
                         "Total Samples": len(X),
                     }
@@ -338,6 +389,7 @@ def main():
                         "model": model, "model_name": model_choice, "problem_type": problem_type,
                         "training_time": t_dur, "cluster_labels": labels, "evaluation_metrics": metrics_dict,
                         "predictions_df": clustered_df, "selected_features": selected_features,
+                        "preprocessing_pipeline": pipeline,
                     })
 
                     st.success(f"✓ Clustering model trained! (Silhouette Score: {sil:.4f})")
@@ -356,7 +408,7 @@ def main():
             m_cards = []
             for k, v in m.items():
                 if isinstance(v, float):
-                    val_str = f"{v:.4f}" if "Score" in k or "R²" in k else f"{v:.2%}" if "Accuracy" in k or "F1" in k else f"{v:.2f}"
+                    val_str = f"{v:.4f}" if "Score" in k or "R²" in k or "Index" in k else f"{v:.2%}" if "Accuracy" in k or "F1" in k or "Precision" in k or "Recall" in k else f"{v:.2f}"
                 else:
                     val_str = str(v)
                 m_cards.append({"icon": "⭐", "label": k, "value": val_str})
@@ -367,7 +419,7 @@ def main():
         prev_page="pages/10_Visualization.py",
         next_page="pages/12_Evaluation.py",
         prev_label="← Visual Analytics",
-        next_label="Deep Model Evaluation & Diagnostics →"
+        next_label="Model Diagnostics & Live Testing Studio →"
     )
 
 

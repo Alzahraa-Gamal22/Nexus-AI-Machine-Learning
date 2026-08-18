@@ -1,13 +1,14 @@
 """
 Nexus AI — Session State Management & Pipeline Tracker
 ------------------------------------------------------
-Provides persistent, reactive state synchronization across all 13 workflow stages.
+Provides persistent, reactive state synchronization across all unified workflow stages.
 """
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn import datasets
+from .preprocessing import PreprocessingPipeline
 
 
 def init_session_state():
@@ -20,7 +21,8 @@ def init_session_state():
         "file_key": None,
         "dataset_name": "No dataset loaded",
 
-        # Preprocessing Flags
+        # Preprocessing & Pipeline Architecture
+        "preprocessing_pipeline": None,
         "duplicates_done": False,
         "missing_done": False,
         "outliers_done": False,
@@ -69,6 +71,16 @@ def init_session_state():
     for key, val in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = val
+
+    if st.session_state.preprocessing_pipeline is None:
+        pipeline = PreprocessingPipeline()
+        if st.session_state.original_data is not None:
+            pipeline.init_from_raw(
+                st.session_state.original_data,
+                target_col=st.session_state.target_column,
+                problem_type=st.session_state.problem_type,
+            )
+        st.session_state.preprocessing_pipeline = pipeline
 
 
 def get_active_data() -> pd.DataFrame:
@@ -213,7 +225,7 @@ def get_workflow_status() -> list:
         },
         {
             "id": "evaluation",
-            "name": "Model Evaluation",
+            "name": "Model Evaluation & Live Testing",
             "page": "pages/12_Evaluation.py",
             "icon": "🎯",
             "done": bool(st.session_state.get("evaluation_metrics")),
@@ -221,7 +233,7 @@ def get_workflow_status() -> list:
         {
             "id": "export",
             "name": "Export Center",
-            "page": "pages/13_Export.py",
+            "page": "pages/14_Export.py",
             "icon": "💾",
             "done": False,
         },
@@ -251,6 +263,8 @@ def reset_workflow(keep_original_file: bool = True):
         else:
             st.session_state[key] = None
 
+    pipeline = PreprocessingPipeline()
+
     if keep_original_file and st.session_state.get("original_data") is not None:
         st.session_state.data = st.session_state.original_data.copy()
         st.session_state.original_numeric_columns = (
@@ -259,12 +273,19 @@ def reset_workflow(keep_original_file: bool = True):
         st.session_state.original_categorical_columns = (
             st.session_state.data.select_dtypes(include=["object", "category"]).columns.tolist()
         )
+        pipeline.init_from_raw(
+            st.session_state.original_data,
+            target_col=st.session_state.get("target_column"),
+            problem_type=st.session_state.get("problem_type", "Classification")
+        )
     elif not keep_original_file:
         st.session_state.data = None
         st.session_state.original_data = None
         st.session_state.file_name = None
         st.session_state.file_key = None
         st.session_state.dataset_name = "No dataset loaded"
+
+    st.session_state.preprocessing_pipeline = pipeline
 
 
 def load_sample_dataset(name: str) -> pd.DataFrame:

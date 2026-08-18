@@ -77,35 +77,47 @@ def main():
                     m_iter = st.slider("Max MICE Iterations:", 5, 30, 10)
 
                 if st.button("⚡ APPLY GLOBAL IMPUTATION", use_container_width=True, key="btn_apply_global_impute"):
-                    df_before = df.copy()
                     num_null_cols = [c for c in null_cols if pd.api.types.is_numeric_dtype(df[c])]
                     cat_null_cols = [c for c in null_cols if not pd.api.types.is_numeric_dtype(df[c])]
 
                     df_res = df.copy()
+                    all_imputers = {}
+
                     if "Mean" in strat:
                         if num_null_cols:
-                            df_res = impute_missing_values(df_res, num_null_cols, strategy="mean")
+                            df_res, imp1 = impute_missing_values(df_res, num_null_cols, strategy="mean")
+                            all_imputers.update(imp1)
                         if cat_null_cols:
-                            df_res = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            df_res, imp2 = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            all_imputers.update(imp2)
                     elif "Median" in strat:
                         if num_null_cols:
-                            df_res = impute_missing_values(df_res, num_null_cols, strategy="median")
+                            df_res, imp1 = impute_missing_values(df_res, num_null_cols, strategy="median")
+                            all_imputers.update(imp1)
                         if cat_null_cols:
-                            df_res = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            df_res, imp2 = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            all_imputers.update(imp2)
                     elif "Most Frequent" in strat:
-                        df_res = impute_missing_values(df_res, null_cols, strategy="most_frequent")
+                        df_res, imp_all = impute_missing_values(df_res, null_cols, strategy="most_frequent")
+                        all_imputers.update(imp_all)
                     elif "KNN" in strat:
                         if num_null_cols:
-                            df_res = impute_missing_values(df_res, num_null_cols, strategy="knn", n_neighbors=k_val)
+                            df_res, imp1 = impute_missing_values(df_res, num_null_cols, strategy="knn", n_neighbors=k_val)
+                            all_imputers.update(imp1)
                         if cat_null_cols:
-                            df_res = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            df_res, imp2 = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            all_imputers.update(imp2)
                     elif "Iterative" in strat:
                         if num_null_cols:
-                            df_res = impute_missing_values(df_res, num_null_cols, strategy="iterative", max_iter=m_iter)
+                            df_res, imp1 = impute_missing_values(df_res, num_null_cols, strategy="iterative", max_iter=m_iter)
+                            all_imputers.update(imp1)
                         if cat_null_cols:
-                            df_res = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            df_res, imp2 = impute_missing_values(df_res, cat_null_cols, strategy="most_frequent")
+                            all_imputers.update(imp2)
 
                     st.session_state.missing_done = True
+                    if st.session_state.get("preprocessing_pipeline"):
+                        st.session_state.preprocessing_pipeline.record_imputation(strat, null_cols, all_imputers)
                     set_active_data(df_res, stage_name="Missing Values", log_entry=f"Applied global imputation ({strat}) on {len(null_cols)} columns.")
                     st.success("✓ Global imputation applied successfully!")
                     st.rerun()
@@ -124,9 +136,13 @@ def main():
 
                 if st.button("⚡ APPLY COLUMN-SPECIFIC IMPUTATION", use_container_width=True, key="btn_apply_col_impute"):
                     df_res = df.copy()
+                    all_imputers = {}
                     for col, s in col_plans.items():
-                        df_res = impute_missing_values(df_res, [col], strategy=s, fill_value="Missing")
+                        df_res, imp = impute_missing_values(df_res, [col], strategy=s, fill_value="Missing")
+                        all_imputers.update(imp)
                     st.session_state.missing_done = True
+                    if st.session_state.get("preprocessing_pipeline"):
+                        st.session_state.preprocessing_pipeline.record_imputation("column_specific", list(col_plans.keys()), all_imputers)
                     set_active_data(df_res, stage_name="Missing Values", log_entry=f"Applied custom column imputation on {len(col_plans)} columns.")
                     st.success("✓ Custom column imputation applied successfully!")
                     st.rerun()
@@ -155,6 +171,8 @@ def main():
                         if st.button(f"🗑️ Drop {len(high_null_cols)} High-Missing Features", use_container_width=True):
                             df_dropped_cols = df.drop(columns=high_null_cols).copy()
                             st.session_state.missing_done = True
+                            if st.session_state.get("preprocessing_pipeline"):
+                                st.session_state.preprocessing_pipeline.record_dropped_columns(high_null_cols)
                             set_active_data(df_dropped_cols, stage_name="Missing Values", log_entry=f"Dropped high-missing features (> {pct_thresh}%): {', '.join(high_null_cols)}")
                             st.success(f"✓ Dropped {len(high_null_cols)} features!")
                             st.rerun()

@@ -223,7 +223,7 @@ def main():
     render_step_navigation(
         prev_page="pages/12_Evaluation.py",
         next_page="pages/01_Dashboard.py",
-        prev_label="← Model Evaluation",
+        prev_label="← Model Evaluation & Testing",
         next_label="Return to Dashboard 🚀"
     )
 

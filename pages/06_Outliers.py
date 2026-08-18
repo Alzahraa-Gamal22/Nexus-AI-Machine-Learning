@@ -119,7 +119,7 @@ def main():
                 elif "Isolation" in method:
                     method_code = "isolation_forest"
 
-                df_treated, count_outliers = handle_outliers(
+                df_treated, count_outliers, bounds_dict = handle_outliers(
                     df,
                     columns=target_cols,
                     method=method_code,
@@ -131,6 +131,9 @@ def main():
                 )
 
                 st.session_state.outliers_done = True
+                if action_val == "clip" and bounds_dict and st.session_state.get("preprocessing_pipeline"):
+                    st.session_state.preprocessing_pipeline.record_outlier_bounds(bounds_dict)
+
                 set_active_data(df_treated, stage_name="Outliers", log_entry=f"Treated outliers on {len(target_cols)} features using {method} (action: {action_val}). Affected points: {count_outliers:,}.")
                 st.success(f"✓ Outlier treatment applied! ({count_outliers:,} points adjusted/removed)")
                 st.rerun()

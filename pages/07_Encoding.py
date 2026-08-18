@@ -98,8 +98,10 @@ def main():
 
         render_html("<br>")
         if st.button("⚡ EXECUTE ENCODING PIPELINE", use_container_width=True, key="btn_apply_encoding"):
-            df_encoded = apply_categorical_encoding(df, decisions)
+            df_encoded, encoders_dict = apply_categorical_encoding(df, decisions)
             st.session_state.encoding_done = True
+            if st.session_state.get("preprocessing_pipeline"):
+                st.session_state.preprocessing_pipeline.record_encoding(decisions, encoders_dict)
             set_active_data(df_encoded, stage_name="Encoding", log_entry=f"Encoded {len(decisions)} categorical features: {decisions}.")
             st.success(f"✓ Successfully encoded {len(decisions)} categorical features into {df_encoded.shape[1]} numeric columns!")
             st.rerun()

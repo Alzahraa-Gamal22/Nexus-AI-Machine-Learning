@@ -81,8 +81,10 @@ def main():
                 elif "Yeo-Johnson" in trans_method:
                     m_code = "yeo-johnson"
 
-                df_trans = transform_features(df, target_math_cols, method=m_code)
+                df_trans, trans_dict = transform_features(df, target_math_cols, method=m_code)
                 st.session_state.feature_eng_done = True
+                if st.session_state.get("preprocessing_pipeline"):
+                    st.session_state.preprocessing_pipeline.record_math_transforms(m_code, target_math_cols, trans_dict)
                 set_active_data(df_trans, stage_name="Feature Engineering", log_entry=f"Applied {trans_method} to: {', '.join(target_math_cols)}")
                 st.success(f"✓ Applied {trans_method} to {len(target_math_cols)} features!")
                 st.rerun()
@@ -103,8 +105,10 @@ def main():
                 st.error("Please select at least one feature.")
             else:
                 try:
-                    df_poly = generate_polynomial_features(df, poly_cols, degree=poly_degree, interaction_only=interaction_only, include_bias=include_bias)
+                    df_poly, poly_obj = generate_polynomial_features(df, poly_cols, degree=poly_degree, interaction_only=interaction_only, include_bias=include_bias)
                     st.session_state.feature_eng_done = True
+                    if poly_obj is not None and st.session_state.get("preprocessing_pipeline"):
+                        st.session_state.preprocessing_pipeline.record_polynomial(poly_obj, poly_cols)
                     set_active_data(df_poly, stage_name="Feature Engineering", log_entry=f"Generated degree-{poly_degree} polynomial features for: {', '.join(poly_cols)}")
                     st.success(f"✓ Expanded feature space to {df_poly.shape[1]} columns!")
                     st.rerun()
@@ -131,8 +135,10 @@ def main():
                 st.error("PCA requires at least 2 numerical features.")
             else:
                 try:
-                    df_pca, pca_model, var_ratios = apply_pca(df, pca_target_cols, n_components=n_comp, standardize=standardize_pca)
+                    df_pca, pca_model, pca_scaler, var_ratios = apply_pca(df, pca_target_cols, n_components=n_comp, standardize=standardize_pca)
                     st.session_state.feature_eng_done = True
+                    if st.session_state.get("preprocessing_pipeline"):
+                        st.session_state.preprocessing_pipeline.record_pca(pca_model, pca_scaler, pca_target_cols)
                     set_active_data(df_pca, stage_name="PCA", log_entry=f"Applied PCA: reduced {len(pca_target_cols)} features to {pca_model.n_components_} components (Cumulative Var: {var_ratios.sum()*100:.1f}%).")
                     st.success(f"✓ PCA complete! Created {pca_model.n_components_} Principal Components explaining {var_ratios.sum()*100:.1f}% of variance.")
                     st.rerun()

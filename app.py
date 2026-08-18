@@ -48,10 +48,10 @@ pages = {
     ],
     "🧠 Machine Learning": [
         st.Page("pages/11_Modeling.py", title="Model Studio & Training", icon="🤖"),
-        st.Page("pages/12_Evaluation.py", title="Model Diagnostics & Eval", icon="🎯"),
+        st.Page("pages/12_Evaluation.py", title="Model Evaluation & Testing", icon="🎯"),
     ],
     "💾 Artifacts & Reports": [
-        st.Page("pages/13_Export.py", title="Export Center & Report", icon="💾"),
+        st.Page("pages/14_Export.py", title="Export Center & Report", icon="💾"),
     ],
 }
 

@@ -96,6 +96,8 @@ def main():
                 if st.button(f"Drop {len(cols_to_drop)} Selected Column(s)", use_container_width=True):
                     df_dropped = drop_unwanted_columns(df, cols_to_drop)
                     st.session_state.cleaning_done = True
+                    if st.session_state.get("preprocessing_pipeline"):
+                        st.session_state.preprocessing_pipeline.record_dropped_columns(cols_to_drop)
                     set_active_data(df_dropped, stage_name="Cleaning", log_entry=f"Dropped columns: {', '.join(cols_to_drop)}")
                     st.success(f"✓ Dropped columns: {', '.join(cols_to_drop)}")
                     st.rerun()
@@ -107,6 +109,8 @@ def main():
                 if st.button(f"Drop {len(constant_cols)} Constant Feature(s)", use_container_width=True):
                     df_const_cleaned, dropped_const = drop_constant_columns(df)
                     st.session_state.cleaning_done = True
+                    if st.session_state.get("preprocessing_pipeline"):
+                        st.session_state.preprocessing_pipeline.record_dropped_columns(dropped_const)
                     set_active_data(df_const_cleaned, stage_name="Cleaning", log_entry=f"Removed constant zero-variance features: {', '.join(dropped_const)}")
                     st.success(f"✓ Removed constant features: {', '.join(dropped_const)}")
                     st.rerun()
